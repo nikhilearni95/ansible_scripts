@@ -1,0 +1,21 @@
+#systemctl start jenkins#
+
+#systemctl restart nginx#
+
+
+handlers:
+    - name: restart php5-fpm
+      service: name=php5-fpm state=restarted
+
+    - name: restart nginx
+      service: name=nginx state=restarted
+
+#Using shell module in ansible
+
+- name: Using shell module in ansible
+  shell: jenkins.sh
+
+- name: Using shell module to start service
+  shell: service nginx restart
+
+  shell: wget url(download location)

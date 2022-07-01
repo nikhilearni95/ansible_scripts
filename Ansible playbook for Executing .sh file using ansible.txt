@@ -1,0 +1,65 @@
+Executing .sh file using ansible
+
+---
+  - name: Shell Examples
+    hosts: testservers
+    tasks:
+
+    - name: Start tomcat
+      become: yes
+      become_user: tomcat
+      async: 10
+      poll: 0
+      shell:
+         "./startup.sh"
+      args:
+        chdir: "/apps/tomcat/tomcat8/bin" 
+      register: datecmd
+      tags: datecmd
+
+**************************************************
+Use command as variables in playbook
+
+---
+  - name: Shell Examples
+    hosts: testservers
+    vars:
+      - script-to-start: "./startbatchupload.sh"
+    tasks:
+    - name: Start the DB batch upload
+      become: yes
+      async: 10
+      poll: 0
+      shell:
+          "{{ script-to-start }}"
+      args:
+        chdir: "/apps/dbscripts/"
+        creates: "startbatchupload.lock" 
+      register: fileout
+      tags: fileout
+
+**************************************************
+Use command as variables in playbook in secure way
+
+---
+  - name: Shell Examples
+    hosts: testservers
+    vars:
+      - script-to-start: "./startbatchupload.sh"
+    tasks:
+    - name: Start the DB batch upload
+      become: yes
+      async: 10
+      poll: 0
+      shell:
+          "{{ script-to-start | quote}}"
+      args:
+        chdir: "/apps/dbscripts/"
+        creates: "startbatchupload.lock" 
+      register: fileout
+      tags: fileout
+
+e "hello therer"
+
+for dog template message
+

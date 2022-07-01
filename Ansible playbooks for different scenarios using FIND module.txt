@@ -1,0 +1,132 @@
+************************URL************************************
+
+https://www.middlewareinventory.com/blog/ansible-find-examples/
+
+Find all the log files older than 30 days with Ansible Find
+
+---
+- name: Ansible Find Example
+  hosts: testserver
+  tasks:
+   - name : Find files older than 30 days
+     find:
+       paths: /var/log
+       patterns: '*.log'
+       age: 30d
+       age_stamp: mtime
+     register: output
+
+   - debug: var=item.path
+     with_items: "{{ output.files }}"
+
+**********************************************************************
+Ansible Find files age within 30 days – Negative ageing
+
+---
+- name: Ansible Find Example
+  hosts: testserver
+  tasks:
+   - name : Find files with age of less than 30 days
+     find:
+       paths: /var/log
+       patterns: '*.log'
+       age: -30d
+     register: output
+
+   - debug: var=item.path
+     with_items: "{{ output.files }}"
+
+**************************************************************
+Recursively find the files by Size using Ansible Find
+
+---
+- name: Ansible Find Example
+  hosts: testserver
+  tasks:
+   - name : Find files bigger than 100mb in size
+     become: true
+     find:
+       paths: /
+       file_type: file
+       size: 100m
+       recurse: yes
+     register: output
+
+   - debug: var=item.path
+     with_items: "{{ output.files }}"
+
+***************************************************************
+Find All directories excluding few,  as a list
+
+---
+- name: Ansible Find Example
+  hosts: testserver
+  vars:
+    Files: []
+  tasks:
+   - name : Find files bigger than 100mb in size
+     become: true
+     find:
+       paths: /var/log
+       file_type: directory
+       recurse: no
+       excludes: 'nginx,mysql'
+     register: output
+
+   - name: Adding Files to the LIST
+     no_log: true
+     set_fact:
+       Files: "{{ Files + [item.path]}}"
+     with_items: "{{ output.files }}"
+
+   - debug: var=Files
+
+***********************************************************
+Find Files with a Regex Pattern in Ansible find
+
+---
+- name: Ansible Find Example
+  hosts: testserver
+  vars:
+    Files: []
+  tasks:
+   - name : Find files bigger than 100mb in size
+     become: true
+     find:
+       paths: /var/log
+       file_type: file
+       patterns:  '^[a-z]*_[0-9]{8}\.log$'
+       size: 100m
+       use_regex: yes
+     register: output
+
+   - name: Adding Files to the LIST
+     no_log: true
+     set_fact:
+       Files: "{{ Files + [item.path]}}" 
+     with_items: "{{ output.files }}"
+
+   - debug: var=Files
+
+*******************************************************
+Ansible Find and Delete the files
+
+---
+- name: Ansible Find Example
+  hosts: testserver
+  tasks:
+   - name : Find files older than 30 days
+     become: yes
+     find:
+       paths: /var/log
+       patterns: '*.log'
+       age: 30d
+       age_stamp: mtime
+     register: output
+
+   - name: Delete the files matching
+     become: yes
+     file:
+       path: "{{item.path}}"
+       state: absent
+     with_items: "{{ output.files }}"
